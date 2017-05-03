@@ -11,7 +11,7 @@ class GCSService(object):
     def __init__(self, CONFIG):
         self.project = config["project_name"]
         self.bucket = config["bucket"]
-        self.client = storage.Client(project=self.project)
+        self.client = storage.Client(project=self.project).get_bucket(self.bucket)
         
     
     def get_storage_location(self):
@@ -38,7 +38,7 @@ class GCSService(object):
         :return: Data of the object
         :rtype: str/bytes
         """
-        return Blob(key, self.bucket).download_as_string()
+        return Blob(key, self.client).download_as_string()
 
     def get_callset_status(self, callset_prefix, status_suffix = "status.json"):
         """
@@ -47,8 +47,7 @@ class GCSService(object):
         :param status_suffix: Suffix used for status files. By default, "status.json"
         :return: A list of call IDs
         """
-        paginator = self.bucket.list_blobs(page_token = next_token,
-                                               prefix = callset_prefix)
+        paginator = self.client.list_blobs(prefix = callset_prefix)
         status_keys = []
         for blob in paginator:
             if str.endswith(blob.name, status_suffix):

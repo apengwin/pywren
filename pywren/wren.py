@@ -22,12 +22,15 @@ logger = logging.getLogger(__name__)
 
 
 def default_executor(**kwargs):
-    executor_str = 'lambda'
     if 'PYWREN_EXECUTOR' in os.environ:
         executor_str = os.environ['PYWREN_EXECUTOR']
+    else:
+        executor_str = "lambda"
 
     if executor_str == 'lambda':
         return lambda_executor(**kwargs)
+    elif executor_str == "gcf"
+        return gcf_executor(**kwargs)
     elif executor_str == 'remote' or executor_str=='standalone':
         return remote_executor(**kwargs)
     elif executor_str == 'dummy':
@@ -45,6 +48,16 @@ def lambda_executor(config=None, job_max_runtime=280):
 
     return Executor(invoker, config, job_max_runtime)
 
+def gc_executor(config=None, job_max_runtime=200):
+    if config is None:
+        config = wrenconfig.default()
+
+    REGION = config['google_account']['region']
+    FUNCTION_NAME = config['google_function']['function_name']
+    PROJECT = config['google_ccount']['project']
+    invoker = invokers.GCFInvoker(REGION, FUNCTION_NAME, PROJECT)
+
+    return Executor(invoker, config, job_max_runtime)
 
 def dummy_executor(config=None, job_max_runtime=100):
     if config is None:

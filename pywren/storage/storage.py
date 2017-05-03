@@ -23,8 +23,8 @@ class Storage(object):
         self.service = config['storage_service']
         if config['storage_service'] == 's3':
             self.service_handler = S3Service(config['s3'])
-        elif config['storage_service'] == 'gcloud':
-            self.service_handler = GCSService(config['gcloud'])
+        elif config['storage_service'] == 'google':
+            self.service_handler = GCSService(config['google'])
         else:
             raise NotImplementedError(("Using {} as storage service is" +
                                        "not supported yet").format(config['storage_service']))

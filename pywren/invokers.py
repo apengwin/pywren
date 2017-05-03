@@ -7,6 +7,7 @@ import glob2
 import os
 from pywren import local
 from pywren.queues import SQSInvoker
+from requests import post, get
 
 SOURCE_DIR = os.path.dirname(os.path.abspath(__file__)) 
 
@@ -39,6 +40,22 @@ class LambdaInvoker(object):
         return {'lambda_function_name' : self.lambda_function_name, 
                 'region_name' : self.region_name}
 
+class GCFInvoker(object):
+    def __init__(self, region_name, gcf_name, project_name):
+        self.gcf_name = gcf_name
+        self.region_name = region_name
+        self.TIME_LIMIT = True
+        self.project_name = project_name
+
+    def invoke(self, payload):
+        URL ="https://{}-{}.cloudfunctions.net/{}".format(self.region_name, self.project_name, self.gcf_name)
+        HEADERS = "Content-Type:application/json"
+        res = post(URL, headers=HEADERS, data = payload)
+        return {}
+
+    def config(self):
+        return {"function_name" : self.gcf_name,
+                "region_name": self.region_name}
 
 class DummyInvoker(object):
     """
