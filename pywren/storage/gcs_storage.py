@@ -8,8 +8,8 @@ class GCSService(object):
     Wrapper for google cloud storage"
     """
 
-    def __init__(self, CONFIG):
-        self.project = config["project_name"]
+    def __init__(self, config):
+        self.project = config["project"]
         self.bucket = config["bucket"]
         self.client = storage.Client(project=self.project).get_bucket(self.bucket)
         

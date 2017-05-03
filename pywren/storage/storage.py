@@ -136,6 +136,7 @@ class Storage(object):
         config['bucket'] = runtime_config['s3_bucket']
         handler = S3Service(config)
 
+        #still not finished for google cloud.
         key = runtime_config['s3_key'].replace(".tar.gz", ".meta.json")
         json_str = handler.get_object(key)
         runtime_meta = json.loads(json_str.decode("ascii"))
