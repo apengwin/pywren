@@ -123,21 +123,31 @@ class Storage(object):
         _, output_key, _ = self.create_keys(callset_id, call_id)
         return self.service_handler.get_call_output(output_key)
 
-    def get_runtime_info(self, runtime_config):
+    def get_runtime_info(self, config):
         """
         Get the metadata given a runtime config.
-        :param runtime_config: configuration of runtime (dictionary)
+        :param config: configuration of runtime (dictionary)
         :return: runtime metadata
         """
-        if runtime_config['runtime_storage'] != 's3':
-            raise NotImplementedError(("Storing runtime in non-S3 storage is not " +
-                                       "supported yet").format(runtime_config['runtime_storage']))
-        config = copy.deepcopy(self.storage_config['s3'])
-        config['bucket'] = runtime_config['s3_bucket']
-        handler = S3Service(config)
+        if config['runtime']['storage'] == 's3':
+            config = {"bucket": runtime_config['runtime']['s3_bucket']}
+            
+            handler = S3Service(config)
 
-        #still not finished for google cloud.
-        key = runtime_config['s3_key'].replace(".tar.gz", ".meta.json")
-        json_str = handler.get_object(key)
-        runtime_meta = json.loads(json_str.decode("ascii"))
-        return runtime_meta
+            key = config['runtime']['s3_key'].replace(".tar.gz", ".meta.json")
+            json_str = handler.get_object(key)
+            runtime_meta = json.loads(json_str.decode("ascii"))
+            return runtime_meta
+
+        if config['runtime']['storage'] == 'google':
+            config = {'bucket': config['runtime']['s3_bucket'],
+                      'project' : config['google_account']['project']}
+
+            handler = GCSService(config)
+
+            key = config['runtime']['google_key'].replace(".tar.gz", ".meta.json")
+            json_str = handler.get_object(key)
+            return json.loads(jstr_str.decode("ascii"))
+        
+        raise NotImplementedError(("Storing runtime in non-S3 storage is not " +
+                                      "supported yet").format(config['runtime']['storage']))

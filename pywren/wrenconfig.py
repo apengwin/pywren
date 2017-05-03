@@ -88,9 +88,9 @@ def extract_storage_config(config):
         storage_config['s3']['region'] = config['account']['aws_region']
     elif storage_config['storage_service'] == 'google':
         storage_config['google_storage'] = {}
-        storage_config['google_storage'] = config['google_storage']['bucket']
+        storage_config['google_storage']['bucket'] = config['google_storage']['bucket']
         storage_config['google_storage']['region'] = config['google_account']['region']
-        storage_config['google_storage']['project' = config['google_account']['project']
+        storage_config['google_storage']['project'] = config['google_account']['project']
     return storage_config
 
 basic_role_policy = {

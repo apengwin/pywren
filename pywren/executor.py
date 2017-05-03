@@ -39,8 +39,10 @@ class Executor(object):
         self.config = config
         self.storage_config = wrenconfig.extract_storage_config(self.config)
         self.storage = storage.Storage(self.storage_config)
-        self.runtime_meta_info = runtime.get_runtime_info(config['runtime'], self.storage)
-
+        if self.config['storage_service'] == 's3':
+            self.runtime_meta_info = runtime.get_runtime_info(config, self.storage)
+        elif self.config['storage_service'] == 'google':
+            self.runtime_meta_info = runtime.get_runtime_info(config, self.storage)
 
         if 'preinstalls' in self.runtime_meta_info:
             logger.info("using serializer with meta-supplied preinstalls")
@@ -84,9 +86,12 @@ class Executor(object):
                     'data_byte_range' : data_byte_range,
                     'call_id' : call_id,
                     'use_cached_runtime' : use_cached_runtime,
-                    'runtime' : self.config['runtime'],
                     'pywren_version' : version.__version__,
                     'runtime_url' : runtime_url }
+        if self.config['storage_service'] == 's3':
+            arg_dict['runtime'] = self.config['runtime']
+        elif self.config['storage_service'] == 'google':
+            arg_dict['runtime'] = self.config['google_runtime']
 
         if extra_env is not None:
             logger.debug("Extra environment vars {}".format(extra_env))
