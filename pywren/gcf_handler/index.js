@@ -47,16 +47,15 @@ exports.handler = function wrenhandler (req, res) {
         const func_bucket = storage.bucket(req.body.storage_info.location);
         const func = func_bucket.file(req.body.func_key);
         options = {
-          destionation : func_filename
+          destination : func_filename
         }
         func.download(options)
           .then((err) => {
             console.log("successfully downloaded function");
             const data = func_bucket.file(req.body.data_key);
             options = {
-              destionation: data_filename
+              destination: data_filename
             }
-            
             data.download(options)
               .then((err) => {
                 console.log("successfully downloaded data"); 
