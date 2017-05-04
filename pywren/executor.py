@@ -286,10 +286,15 @@ class Executor(object):
                                extra_env=extra_env, extra_meta=extra_meta)
 
     def get_logs(self, future, verbose=True):
-
-
+        """
+        Get logs.
+        :param future:
+        :param verbose: 
+        :return: list of (timestamp, message) tuples
+        """
+        if self.config['storage_service'] != 's3':
+            raise NotImplementedError("Fetching logs from non-AWS platform is not supported yet")
         logclient = boto3.client('logs', region_name=self.config['account']['aws_region'])
-
 
         log_group_name = future.run_status['log_group_name']
         log_stream_name = future.run_status['log_stream_name']

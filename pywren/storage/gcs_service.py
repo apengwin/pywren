@@ -52,7 +52,7 @@ class GCSService(object):
         for blob in paginator:
             if str.endswith(blob.name, status_suffix):
                 status_keys.append(blob.name)
-        call_ids = [k[(len(callset_prefix) + 1:].split("/")[0] for k in status_keys]
+        call_ids = [k[len(callset_prefix) + 1:].split("/")[0] for k in status_keys]
         return call_ids
                 
 

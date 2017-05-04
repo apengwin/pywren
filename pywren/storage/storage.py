@@ -5,8 +5,10 @@ import copy
 
 if sys.version_info > (3, 0):
     from .s3_service import S3Service
+    from .gcs_service import GCSService
 else:
     from s3_service import S3Service
+    from gcs_service import GCSService
 
 
 class Storage(object):
@@ -24,7 +26,7 @@ class Storage(object):
         if config['storage_service'] == 's3':
             self.service_handler = S3Service(config['s3'])
         elif config['storage_service'] == 'google':
-            self.service_handler = GCSService(config['google'])
+            self.service_handler = GCSService(config['google_storage'])
         else:
             raise NotImplementedError(("Using {} as storage service is" +
                                        "not supported yet").format(config['storage_service']))

@@ -26,10 +26,10 @@ def default_executor(**kwargs):
         executor_str = os.environ['PYWREN_EXECUTOR']
     else:
         executor_str = "lambda"
-
+    executr_str = "gcf"
     if executor_str == 'lambda':
         return lambda_executor(**kwargs)
-    elif executor_str == "gcf"
+    elif executor_str == "gcf":
         return gcf_executor(**kwargs)
     elif executor_str == 'remote' or executor_str=='standalone':
         return remote_executor(**kwargs)
