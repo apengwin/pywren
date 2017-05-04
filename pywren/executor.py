@@ -91,7 +91,7 @@ class Executor(object):
         if self.config['storage_service'] == 's3':
             arg_dict['runtime'] = self.config['runtime']
         elif self.config['storage_service'] == 'google':
-            arg_dict['runtime'] = self.config['google_runtime']
+            arg_dict['runtime'] = self.config['runtime']
 
         if extra_env is not None:
             logger.debug("Extra environment vars {}".format(extra_env))
@@ -249,7 +249,6 @@ class Executor(object):
                                            host_job_meta.copy(),
                                            agg_data_key,
                                            data_byte_range))
-
             logger.info("map {} {} apply async".format(callset_id, call_id))
 
             call_result_objs.append(cb)

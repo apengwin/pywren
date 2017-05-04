@@ -26,7 +26,7 @@ def default_executor(**kwargs):
         executor_str = os.environ['PYWREN_EXECUTOR']
     else:
         executor_str = "lambda"
-    executr_str = "gcf"
+    executor_str = "gcf"
     if executor_str == 'lambda':
         return lambda_executor(**kwargs)
     elif executor_str == "gcf":
@@ -48,13 +48,13 @@ def lambda_executor(config=None, job_max_runtime=280):
 
     return Executor(invoker, config, job_max_runtime)
 
-def gc_executor(config=None, job_max_runtime=200):
+def gcf_executor(config=None, job_max_runtime=200):
     if config is None:
         config = wrenconfig.default()
 
     REGION = config['google_account']['region']
     FUNCTION_NAME = config['google_function']['function_name']
-    PROJECT = config['google_ccount']['project']
+    PROJECT = config['google_account']['project']
     invoker = invokers.GCFInvoker(REGION, FUNCTION_NAME, PROJECT)
 
     return Executor(invoker, config, job_max_runtime)

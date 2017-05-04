@@ -49,8 +49,9 @@ class GCFInvoker(object):
 
     def invoke(self, payload):
         URL ="https://{}-{}.cloudfunctions.net/{}".format(self.region_name, self.project_name, self.gcf_name)
-        HEADERS = "Content-Type:application/json"
+        HEADERS = {"Content-Type":"application/json"}
         res = post(URL, headers=HEADERS, data = payload)
+        print "HIIIII"
         return {}
 
     def config(self):

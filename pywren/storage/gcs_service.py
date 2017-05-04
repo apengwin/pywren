@@ -2,6 +2,7 @@ import os
 import json
 from google.cloud import storage
 from google.cloud.storage import Blob
+import google.cloud.exceptions
 
 class GCSService(object):
     """
@@ -29,7 +30,7 @@ class GCSService(object):
         :type data: str/bytes
         :return: None
         """
-        Blob(key, self.bucket).upload_from_string(data)
+        Blob(key, self.client).upload_from_string(data)
 
     def get_object(self, key):
         """

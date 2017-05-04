@@ -142,14 +142,14 @@ class Storage(object):
             return runtime_meta
 
         if config['runtime']['storage'] == 'google':
-            config = {'bucket': config['runtime']['s3_bucket'],
+            storage_config = {'bucket': config['runtime']['google_bucket'],
                       'project' : config['google_account']['project']}
 
-            handler = GCSService(config)
+            handler = GCSService(storage_config)
 
             key = config['runtime']['google_key'].replace(".tar.gz", ".meta.json")
             json_str = handler.get_object(key)
-            return json.loads(jstr_str.decode("ascii"))
+            return json.loads(json_str.decode("ascii"))
         
         raise NotImplementedError(("Storing runtime in non-S3 storage is not " +
                                       "supported yet").format(config['runtime']['storage']))
