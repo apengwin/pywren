@@ -2,7 +2,6 @@ from __future__ import print_function
 from six.moves import cPickle as pickle
 import sys
 import traceback
-#import boto3
 import json
 import base64
 from tblib import pickling_support

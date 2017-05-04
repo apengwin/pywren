@@ -9,12 +9,11 @@ const Storage = require('@google-cloud/storage');
 exports.handler = function wrenhandler (req, res) {
 
   response = {"exception": null};
-
-  const bucketName = "allanpywrentest";
-  const runtimeName = "condaruntime.tar.gz";
+  const runtime_loc = req.body.runtime.google_bucket;
+  const runtimeName = req.body.runtime.google_key;
   const conda_path = "/tmp/condaruntime/bin";
   const storage = Storage();
-  const bucket = storage.bucket(bucketName);
+  const runtime_bucket = storage.bucket(runtime_loc);
   const runtime = bucket.file(runtimeName);
 
   const func_filename = "/tmp/func.pickle";
@@ -28,6 +27,7 @@ exports.handler = function wrenhandler (req, res) {
   response['output_key'] = req.body.output_key;
   response['status_key'] = req.body.status_key;
 
+  const storage_bucket = storage.bucket(req.body.storage_info.location);
   options = {
     destination: dest + runtimeName 
   }
@@ -44,15 +44,14 @@ exports.handler = function wrenhandler (req, res) {
 
       TAR.then((err) => {
         console.log("finished untarring");
-        const func_bucket = storage.bucket(req.body.storage_info.location);
-        const func = func_bucket.file(req.body.func_key);
+        const func = storage_bucket.file(req.body.func_key);
         options = {
           destination : func_filename
         }
         func.download(options)
           .then((err) => {
             console.log("successfully downloaded function");
-            const data = func_bucket.file(req.body.data_key);
+            const data = storage_bucket.file(req.body.data_key);
             options = {
               destination: data_filename
             }
@@ -71,37 +70,31 @@ exports.handler = function wrenhandler (req, res) {
                 attempt_python.then((err) =>{
                   console.log("done with python");
                   console.log(req.body.output_key);
-                  func_bucket.upload(output_filename, {destination: req.body.output_key})
+                  storage_bucket.upload(output_filename, {destination: req.body.output_key})
                     .then((err) => {
-                      const status_file = func_bucket.file(req.body.status_key);
+                      const status_file = storage_bucket.file(req.body.status_key);
                       console.log(req.body.status_key);
                       stream = status_file.createWriteStream();
                       stream.write(JSON.stringify(response));
                       stream.end();
                       
                       res.send("ok");
-                    }).catch(function(err) {
-                       console.err('Help: ', err);
                     });
-                }).catch(function(err) {
-                  console.error('Error uploading output: ', err);
-                  res.send("fail");
-                });
-            }).catch(function(err) {
-              console.error('Error with python ', err);
-              res.send("fail");
-            });
-         }).catch(function(err) {
-           console.error("Error downloading data: ", err);
-           res.send("fail");
-         });
-   }).catch(function(err) {
-     console.error('error downloading function ', err);
-     res.send("fail");
-   });
-  }).catch(function(err) {
-    console.error('Error untarring ', err);
-  });
+                 });
+              });
+           });
+        });
+    }).catch(function(err) {
+      console.error('Error ', err);
+      response["exception"] = err.toString();
+     
+      const status_file = storage_bucket.file(req.body.status_key);
+      console.log(req.body.status_key);
+      stream = status_file.createWriteStream();
+      stream.write(JSON.stringify(response));
+      stream.end();
+      res.send("fail");
+    });
 }
 
 /* Utility functions to figure out what's going on under the hood, 
