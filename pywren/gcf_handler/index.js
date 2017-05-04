@@ -6,9 +6,9 @@
 const spawn = require('child-process-promise').spawn;
 const Storage = require('@google-cloud/storage');
 
-exports.wrenhandler = function wrenhandler (req, res) {
+exports.handler = function wrenhandler (req, res) {
 
-  response = {"Exception": null};
+  response = {"exception": null};
 
   const bucketName = "allanpywrentest";
   const runtimeName = "condaruntime.tar.gz";
@@ -22,6 +22,12 @@ exports.wrenhandler = function wrenhandler (req, res) {
   const output_filename = "/tmp/output.pickle";
 
   const dest = "/tmp/";
+
+  response['func_key'] = req.body.func_key;
+  response['data_key'] = req.body.data_key;
+  response['output_key'] = req.body.output_key;
+  response['status_key'] = req.body.status_key;
+
   options = {
     destination: dest + runtimeName 
   }
@@ -68,6 +74,12 @@ exports.wrenhandler = function wrenhandler (req, res) {
                   console.log(req.body.output_key);
                   func_bucket.upload(output_filename, {destination: req.body.output_key})
                     .then((err) => {
+                      const status_file = func_bucket.file(req.body.status_key);
+                      console.log(req.body.status_key);
+                      stream = status_file.createWriteStream();
+                      stream.write(JSON.stringify(response));
+                      stream.end();
+                      
                       res.send("ok");
                     }).catch(function(err) {
                        console.err('Help: ', err);
