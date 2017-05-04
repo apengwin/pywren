@@ -1,0 +1,49 @@
+storage_service: google
+
+account:
+    aws_account_id: 899133214451
+    aws_lambda_role: pywren_exec_role_1
+    aws_region: us-west-2
+
+lambda:
+    memory : 1536
+    timeout : 300
+    function_name : pywren_1
+
+s3:
+    bucket: allanpeng-pywren-335
+    pywren_prefix: pywren.jobs
+
+runtime:
+    storage: google
+    s3_bucket: ericmjonas-public
+    s3_key: pywren.runtime/pywren_runtime-2.7-default.tar.gz
+    google_bucket : allanpywrentest
+    google_key : condaruntime.tar.gz
+
+standalone:
+    ec2_instance_type: m4.4xlarge
+    sqs_queue_name: pywren-jobs-1
+    visibility: 10
+    ec2_ssh_key : ec2-us-west-2
+    target_ami : ami-b04e92d0
+    instance_name: pywren-standalone
+    instance_profile_name: pywren-standalone
+    max_idle_time: 60
+    idle_terminate_granularity: 3600
+
+google_account:
+    region: us-central1
+    project: pywrenTest
+
+google_storage:
+    bucket : allanpeng11231994storage
+    project: pywrenTest
+    pywren_prefix: pywren.jobs
+
+google_function:
+    memory : 1024
+    timeout : 300
+    function_name : handler
+    project: pywrenTest
+

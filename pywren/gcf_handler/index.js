@@ -14,7 +14,7 @@ exports.handler = function wrenhandler (req, res) {
   const conda_path = "/tmp/condaruntime/bin";
   const storage = Storage();
   const runtime_bucket = storage.bucket(runtime_loc);
-  const runtime = bucket.file(runtimeName);
+  const runtime = runtime_bucket.file(runtimeName);
 
   const func_filename = "/tmp/func.pickle";
   const data_filename = "/tmp/data.pickle";
