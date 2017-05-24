@@ -48,42 +48,55 @@ exports.handler = function wrenhandler (req, res) {
         options = {
           destination : func_filename
         }
-        func.download(options)
-          .then((err) => {
-            console.log("successfully downloaded function");
-            const data = storage_bucket.file(req.body.data_key);
-            options = {
-              destination: data_filename
-            }
-            data.download(options)
-              .then((err) => {
-                console.log("successfully downloaded data"); 
-                var attempt_python = spawn(conda_path + "/python", ["jobrunner.py", func_filename, data_filename, output_filename]);
-                var pythonProc = attempt_python.childProcess;
+        return func.download(options)
+      })
+      .catch(function(error) {
+        console.error('ERROR w func download ', error);
+        res.send("fail");
+      })
+      .then((err) => {
+        console.log("successfully downloaded function");
+        const data = storage_bucket.file(req.body.data_key);
+        options = {
+          destination: data_filename
+        }
+        return data.download(options)
+      })
+      .catch(function(error) {
+          console.error('ERROR w data download ', error);
+          res.send("fail");
+      })
+      .then((err) => {
+        console.log("successfully downloaded data");
+        var attempt_python = spawn(conda_path + "/python", ["jobrunner.py", func_filename, data_filename, output_filename]);
+        var pythonProc = attempt_python.childProcess;
 
-                pythonProc.stdout.on('data', function(data) {
-                  console.log("[PYTHON] stdout: ", data.toString());
-                });
-                pythonProc.stderr.on('data', function(data) {
-                  console.log("[PYTHON] stderr: ", data.toString());
-                });
-                attempt_python.then((err) =>{
-                  console.log("done with python");
-                  console.log(req.body.output_key);
-                  storage_bucket.upload(output_filename, {destination: req.body.output_key})
-                    .then((err) => {
-                      const status_file = storage_bucket.file(req.body.status_key);
-                      console.log(req.body.status_key);
-                      stream = status_file.createWriteStream();
-                      stream.write(JSON.stringify(response));
-                      stream.end();
-                      
-                      res.send("ok");
-                    });
-                 });
-              });
-           });
+        pythonProc.stdout.on('data', function(data) {
+          console.log("[PYTHON] stdout: ", data.toString());
         });
+        pythonProc.stderr.on('data', function(data) {
+          console.log("[PYTHON] stderr: ", data.toString());
+        });
+        attempt_python.then((err) =>{
+          console.log("done with python");
+          console.log(req.body.output_key);
+          storage_bucket.upload(output_filename, {destination: req.body.output_key})
+          .then((err) => {
+            const status_file = storage_bucket.file(req.body.status_key);
+            console.error('THIS IS THE STATUS KEY ', req.body.status_key);
+            console.log(req.body.status_key);
+            stream = status_file.createWriteStream();
+            stream.write(JSON.stringify(response), function() {
+              console.log("write completed " + req.body.status_key);
+              stream.end();
+              res.send("ok");
+            });
+          })
+          .catch(function(err){
+             console.error('Err w uploading output pickle or status file', err);
+          });
+        });
+      });
     }).catch(function(err) {
       console.error('Error ', err);
       response["exception"] = err.toString();
