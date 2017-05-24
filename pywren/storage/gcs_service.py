@@ -3,6 +3,7 @@ import json
 from google.cloud import storage
 from google.cloud.storage import Blob
 import google.cloud.exceptions
+from gcloud_requests.connection import storage_http
 
 class GCSService(object):
     """
@@ -12,7 +13,7 @@ class GCSService(object):
     def __init__(self, config):
         self.project = config["project"]
         self.bucket = config["bucket"]
-        self.client = storage.Client(project=self.project).get_bucket(self.bucket)
+        self.client = storage.Client(project=self.project, _http = storage_http).get_bucket(self.bucket)
         
     
     def get_storage_location(self):
@@ -51,7 +52,7 @@ class GCSService(object):
         paginator = self.client.list_blobs(prefix = callset_prefix)
         status_keys = []
         for blob in paginator:
-            if str.endswith(blob.name, status_suffix):
+            if str.endswith(str(blob.name), status_suffix):
                 status_keys.append(blob.name)
         call_ids = [k[len(callset_prefix) + 1:].split("/")[0] for k in status_keys]
         return call_ids
