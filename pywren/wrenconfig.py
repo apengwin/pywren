@@ -72,7 +72,7 @@ def default():
     if config_data['storage_service'] == 'google':
         config_data['storage_prefix'] = config_data['google_storage']['pywren_prefix']
         config_data['runtime']['runtime_storage'] = 'google'
-    elif config_data['storage_service'] == 'aws':
+    elif config_data['storage_service'] == 's3':
         config_data['storage_prefix'] = config_data['s3']['pywren_prefix']
         config_data['runtime']['runtime_storage'] = 's3'
     return config_data

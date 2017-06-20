@@ -22,11 +22,11 @@ logger = logging.getLogger(__name__)
 
 
 def default_executor(**kwargs):
-    if 'PYWREN_EXECUTOR' in os.environ:
-        executor_str = os.environ['PYWREN_EXECUTOR']
+    config = wrenconfig.default()
+    if config['storage_service'] == 'google':
+        executor_str = 'gcf'
     else:
         executor_str = "lambda"
-    executor_str = "gcf"
     if executor_str == 'lambda':
         return lambda_executor(**kwargs)
     elif executor_str == "gcf":
@@ -46,6 +46,7 @@ def lambda_executor(config=None, job_max_runtime=280):
     FUNCTION_NAME = config['lambda']['function_name']
     invoker = invokers.LambdaInvoker(AWS_REGION, FUNCTION_NAME)
 
+    logger.info('using aws executor')
     return Executor(invoker, config, job_max_runtime)
 
 def gcf_executor(config=None, job_max_runtime=200):
@@ -57,6 +58,7 @@ def gcf_executor(config=None, job_max_runtime=200):
     PROJECT = config['google_account']['project']
     invoker = invokers.GCFInvoker(REGION, FUNCTION_NAME, PROJECT)
 
+    logger.info('using google executor')
     return Executor(invoker, config, job_max_runtime)
 
 def dummy_executor(config=None, job_max_runtime=100):
