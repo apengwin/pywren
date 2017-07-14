@@ -102,14 +102,12 @@ class DummyExecutorImport(unittest.TestCase):
 #         for m in mod_paths:
 #             print(m)
 
-#         config =  pywren.wrenconfig.default()
+        config = pywren.wrenconfig.default()
 
-#         runtime_bucket = config['runtime']['s3_bucket']
-#         runtime_key =  config['runtime']['s3_key']
-#         info = runtime.get_runtime_info(runtime_bucket, runtime_key)
-#         print(info.keys())
-#         for f in info['pkg_ver_list']:
-#             print(f[0])
+        info = runtime.get_runtime_info(config['runtime'])
+        print(info.keys())
+        for f in info['pkg_ver_list']:
+            print(f[0])
 
 class InteractiveTest(unittest.TestCase):
 
@@ -126,4 +124,27 @@ class InteractiveTest(unittest.TestCase):
 
 
 
+class ExcludeTest(unittest.TestCase):
+
+    '''
+        Exclude modules in map and check if the exclusion worked
+    '''
+    def setUp(self):
+        self.wrenexec = pywren.default_executor()
+
+    def test_simple(self):
+
+        def foo(x):
+            return extmodule.foo_add(x)
+        x = 1.0
+        fut0 = self.wrenexec.map(foo, [x])
+        res = fut0[0].result()
+        self.assertEqual(res, 2.0)
+
+        fut = self.wrenexec.map(foo, [x], exclude_modules=["extmodule"])
+        try:
+            fut[0].result()
+            self.fail("shouldn't happen")
+        except ImportError as e:
+            pass
 
