@@ -116,7 +116,9 @@ exports.handler = function wrenhandler (req, res) {
 
 exports.test_handler = function testhandler (event, callback) {
   response = {"exception": null};
-  const req = event.data;
+  const pubSubMessage = event.data;
+  const req = JSON.parse(Buffer.from(pubSubMessage.data, 'base64').toString());
+
   const runtime_loc = req.runtime.google_bucket;
   const runtimeName = req.runtime.google_key;
   const conda_path = "/tmp/condaruntime/bin";
@@ -143,7 +145,6 @@ exports.test_handler = function testhandler (event, callback) {
   console.log("starting");
   runtime.download(options)
     .then((err) => {
-              res.send("ok");
       console.log(`File %{file.name} downloaded to ${dest}.`);
 
       console.log("Attempting to untar...");
@@ -161,7 +162,7 @@ exports.test_handler = function testhandler (event, callback) {
       })
       .catch(function(error) {
         console.error('ERROR w func download ', error);
-        res.send("fail");
+        callback();
       })
       .then((err) => {
         console.log("successfully downloaded function");
@@ -173,7 +174,7 @@ exports.test_handler = function testhandler (event, callback) {
       })
       .catch(function(error) {
           console.error('ERROR w data download ', error);
-          res.send("fail");
+          callback();
       })
       .then((err) => {
         console.log("successfully downloaded data");
@@ -201,14 +202,17 @@ exports.test_handler = function testhandler (event, callback) {
             stream.write(JSON.stringify(response), function() {
               stream.end();
               console.log("write completed " + req.status_key);
+              callback();
             });
           })
           .catch(function(err){
              console.error('Err w uploading output pickle or status file', err);
+             callback();
           });
         });
       }).catch(function(err){
         console.error('Error somewhere after launching python', err);
+        callback();
       });
     }).catch(function(err) {
       console.error('Error ', err);
@@ -219,7 +223,7 @@ exports.test_handler = function testhandler (event, callback) {
       stream = status_file.createWriteStream();
       stream.write(JSON.stringify(response));
       stream.end();
-      res.send("fail");
+      callback();
     });
 }
 /* Utility functions to figure out what's going on under the hood, 
